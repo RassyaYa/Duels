@@ -1,65 +1,89 @@
-<?php
-
 namespace Duels;
 
 use pocketmine\Player;
-use pocketmine\utils\TextFormat;
-use Duels\Forms\DuelForm;
+use pocketmine\Server;
 
 class DuelManager {
+    private array $challenges = [];
     private Main $plugin;
-    public array $waitingDuels = [];
 
     public function __construct(Main $plugin) {
         $this->plugin = $plugin;
     }
 
-    public function showDuelForm(Player $player): void {
-        $form = new DuelForm($this);
-        $player->sendForm($form);
-    }
-
-    public function startDuel(Player $player1, Player $player2, int $duration): void {
-        $duel = new Duel($player1, $player2, $duration);
-        $duel->start();
-    }
-
-    public function handleAcceptCommand(Player $sender): bool {
-        if (!isset($this->waitingDuels[$sender->getName()])) {
-            $sender->sendMessage(TextFormat::RED . "Anda tidak memiliki tantangan duel yang aktif.");
+    public function handleDuelCommand(CommandSender $sender, array $args): bool {
+        if (!$sender instanceof Player) {
+            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
             return true;
         }
 
-        $challengerName = $this->waitingDuels[$sender->getName()];
-        unset($this->waitingDuels[$sender->getName()]);
-
-        $challenger = $this->plugin->getServer()->getPlayer($challengerName);
-        if ($challenger === null) {
-            $sender->sendMessage(TextFormat::RED . "Tantangan tidak valid.");
+        if (count($args) < 2) {
+            $sender->sendMessage("Gunakan: /duel <nama_pemain> <waktu_dalam_detik>");
             return true;
         }
 
-        // Set default duration to 60 seconds
-        $duration = 60; // You can modify this or make it dynamic later
-        $this->startDuel($challenger, $sender, $duration);
+        $targetName = $args[0];
+        $duration = (int)$args[1];
+        $target = $this->plugin->getServer()->getPlayerExact($targetName);
+
+        if ($target === null || $target === $sender) {
+            $sender->sendMessage("Pemain tidak ditemukan atau Anda tidak dapat menantang diri sendiri!");
+            return true;
+        }
+
+        // Mengatur tantangan duel
+        $this->challenges[$sender->getName()] = $target->getName();
+        $sender->sendMessage("Tantangan duel telah dikirim ke " . $target->getName());
+        $target->sendMessage($sender->getName() . " menantang Anda untuk duel! Gunakan /accept atau /decline.");
+
         return true;
     }
 
-    public function handleDeclineCommand(Player $sender): bool {
-        if (!isset($this->waitingDuels[$sender->getName()])) {
-            $sender->sendMessage(TextFormat::RED . "Anda tidak memiliki tantangan duel yang aktif.");
+    public function handleAcceptCommand(CommandSender $sender): bool {
+        if (!$sender instanceof Player) {
+            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
             return true;
         }
 
-        $challengerName = $this->waitingDuels[$sender->getName()];
-        unset($this->waitingDuels[$sender->getName()]);
+        $challengerName = array_search($sender->getName(), $this->challenges);
 
-        $challenger = $this->plugin->getServer()->getPlayer($challengerName);
-        if ($challenger !== null) {
-            $challenger->sendMessage(TextFormat::RED . $sender->getName() . " menolak tantangan Anda.");
+        if ($challengerName === false) {
+            $sender->sendMessage("Anda tidak memiliki tantangan duel yang aktif!");
+            return true;
         }
 
-        $sender->sendMessage(TextFormat::GREEN . "Anda telah menolak tantangan duel.");
+        // Menghapus tantangan dan memulai duel
+        unset($this->challenges[$challengerName]);
+        $challenger = $this->plugin->getServer()->getPlayerExact($challengerName);
+
+        if ($challenger instanceof Player) {
+            $duel = new Duel($challenger, $sender);
+            $duel->start();
+        }
+
+        return true;
+    }
+
+    public function handleDeclineCommand(CommandSender $sender): bool {
+        if (!$sender instanceof Player) {
+            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
+            return true;
+        }
+
+        $challengerName = array_search($sender->getName(), $this->challenges);
+
+        if ($challengerName === false) {
+            $sender->sendMessage("Anda tidak memiliki tantangan duel yang aktif!");
+            return true;
+        }
+
+        unset($this->challenges[$challengerName]);
+        $challenger = $this->plugin->getServer()->getPlayerExact($challengerName);
+
+        if ($challenger instanceof Player) {
+            $challenger->sendMessage($sender->getName() . " telah menolak tantangan duel.");
+        }
+
         return true;
     }
 }
