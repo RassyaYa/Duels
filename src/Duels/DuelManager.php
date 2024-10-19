@@ -4,7 +4,6 @@ namespace Duels;
 
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
-use pocketmine\scheduler\ClosureTask;
 use Duels\Forms\DuelForm;
 
 class DuelManager {
