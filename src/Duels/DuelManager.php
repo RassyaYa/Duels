@@ -19,8 +19,8 @@ class DuelManager {
         $player->sendForm($form);
     }
 
-    public function startDuel(Player $player1, Player $player2): void {
-        $duel = new Duel($player1, $player2, 60); // 60 seconds duration
+    public function startDuel(Player $player1, Player $player2, int $duration): void {
+        $duel = new Duel($player1, $player2, $duration);
         $duel->start();
     }
 
@@ -39,7 +39,9 @@ class DuelManager {
             return true;
         }
 
-        $this->startDuel($challenger, $sender);
+        // Set default duration to 60 seconds
+        $duration = 60; // You can modify this or make it dynamic later
+        $this->startDuel($challenger, $sender, $duration);
         return true;
     }
 
