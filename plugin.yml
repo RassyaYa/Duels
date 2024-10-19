@@ -1,0 +1,8 @@
+name: Duels
+version: 1.2.0
+main: Duels\Main
+api: [5.0.0]
+commands:
+  duel:
+    description: "Tantang pemain lain untuk berduel"
+    usage: "/duel <nama_pemain> <waktu_dalam_detik>"
