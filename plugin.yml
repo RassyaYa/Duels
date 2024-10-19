@@ -1,9 +1,15 @@
 name: Duels
-version: 1.2.0
+version: 1.0.0
 main: Duels\Main
 api: [5.0.0]
-author: VsrStudio
+author: "VsrStudio"
 commands:
   duel:
     description: "Tantang pemain lain untuk berduel"
     usage: "/duel <nama_pemain> <waktu_dalam_detik>"
+  accept:
+    description: "Terima tantangan duel"
+    usage: "/accept"
+  decline:
+    description: "Tolak tantangan duel"
+    usage: "/decline"
