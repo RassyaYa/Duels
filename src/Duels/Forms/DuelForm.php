@@ -1,76 +1,29 @@
-<?php
-
 namespace Duels\Forms;
 
 use pocketmine\Player;
 use pocketmine\form\CustomForm;
-use pocketmine\utils\TextFormat;
+use pocketmine\form\Form;
 use Duels\DuelManager;
 
 class DuelForm extends CustomForm {
+    private Player $player;
 
-    private DuelManager $duelManager;
+    public function __construct(Player $player) {
+        parent::__construct("Duel Form");
+        $this->player = $player;
 
-    public function __construct(DuelManager $duelManager) {
-        parent::__construct(function (Player $player, array $data = null) {
-            if ($data === null) {
-                return;
-            }
-
-            $targetName = $data[0];
-            $waitTime = intval($data[1]);
-
-            if (empty($targetName)) {
-                $player->sendMessage(TextFormat::RED . "Nama pemain tidak boleh kosong.");
-                return;
-            }
-
-            if ($waitTime <= 0) {
-                $player->sendMessage(TextFormat::RED . "Waktu tunggu tidak valid.");
-                return;
-            }
-
-            // Simpan tantangan duel
-            $this->duelManager->waitingDuels[$player->getName()] = $targetName;
-            $player->sendMessage(TextFormat::GREEN . "Tantangan duel terkirim ke " . $targetName . ". Waktu tunggu: " . $waitTime . " detik.");
-
-            // Mulai duel setelah waktu tunggu
-            $this->duelManager->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(new \pocketmine\scheduler\ClosureTask(function () use ($player, $targetName) {
-                if (isset($this->duelManager->waitingDuels[$player->getName()])) {
-                    unset($this->duelManager->waitingDuels[$player->getName()]);
-                    $target = $this->duelManager->getPlugin()->getServer()->getPlayer($targetName);
-                    if ($target instanceof Player) {
-                        $this->duelManager->startDuel($player, $target, 60); // Default duration
-                    } else {
-                        $player->sendMessage(TextFormat::RED . "Pemain " . $targetName . " tidak ditemukan.");
-                    }
-                }
-            }), $waitTime * 20); // 20 ticks per second
-        });
-
-        $this->duelManager = $duelManager;
+        // Tambahkan elemen form
+        $this->addLabel("Tantang pemain lain untuk berduel!");
+        $this->addInput("Nama Pemain:", "Masukkan nama pemain...");
+        $this->addInput("Durasi (detik):", "Masukkan durasi...");
     }
 
-    public function jsonSerialize() {
-        return [
-            "type" => "custom_form",
-            "title" => "Tantangan Duel",
-            "content" => [
-                [
-                    "type" => "label",
-                    "text" => "Pilih pemain untuk ditantang dan waktu tunggu:"
-                ],
-                [
-                    "type" => "input",
-                    "text" => "Masukkan nama pemain:",
-                    "placeholder" => "PlayerName"
-                ],
-                [
-                    "type" => "input",
-                    "text" => "Masukkan waktu dalam detik:",
-                    "placeholder" => "5"
-                ]
-            ]
-        ];
+    public function handleResponse(Player $player, array $data): void {
+        $targetName = $data[0];
+        $duration = (int)$data[1];
+
+        // Menggunakan DuelManager untuk menangani tantangan
+        $duelManager = $this->player->getServer()->getPluginManager()->getPlugin("Duels")->getDuelManager();
+        $duelManager->handleDuelCommand($player, [$targetName, $duration]);
     }
 }
