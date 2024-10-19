@@ -20,7 +20,7 @@ class Duel {
         $this->player1->sendMessage("Duel dimulai dengan " . $this->player2->getName() . " selama " . $this->duration . " detik!");
         $this->player2->sendMessage("Duel dimulai dengan " . $this->player1->getName() . " selama " . $this->duration . " detik!");
         
-        // Logika duel yang sebenarnya akan ditempatkan di sini
+        // Logik duel yang sebenarnya akan ditempatkan di sini
     }
 
     private function preparePlayer(Player $player): void {
