@@ -2,14 +2,27 @@ name: Duels
 version: 1.0.0
 main: Duels\Main
 api: [5.0.0]
-author: "VsrStudio"
+author: "Nama Anda"  # Ganti dengan nama Anda
 commands:
   duel:
     description: "Tantang pemain lain untuk berduel"
     usage: "/duel <nama_pemain> <waktu_dalam_detik>"
+    permission: "duels.command.duel"  # Menambahkan permission untuk perintah duel
   accept:
     description: "Terima tantangan duel"
     usage: "/accept"
+    permission: "duels.command.accept"  # Menambahkan permission untuk perintah accept
   decline:
     description: "Tolak tantangan duel"
     usage: "/decline"
+    permission: "duels.command.decline"  # Menambahkan permission untuk perintah decline
+permissions:
+  duels.command.duel:
+    description: "Mengizinkan pemain untuk menantang duel."
+    default: true  # Default permission untuk semua pemain
+  duels.command.accept:
+    description: "Mengizinkan pemain untuk menerima tantangan duel."
+    default: true  # Default permission untuk semua pemain
+  duels.command.decline:
+    description: "Mengizinkan pemain untuk menolak tantangan duel."
+    default: true  # Default permission untuk semua pemain
