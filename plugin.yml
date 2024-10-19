@@ -2,6 +2,7 @@ name: Duels
 version: 1.2.0
 main: Duels\Main
 api: [5.0.0]
+author: VsrStudio
 commands:
   duel:
     description: "Tantang pemain lain untuk berduel"
