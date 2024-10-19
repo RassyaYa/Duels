@@ -13,16 +13,15 @@ class DuelForm extends CustomForm {
 
     public function __construct(DuelManager $duelManager) {
         parent::__construct(function (Player $player, array $data = null) {
-            if ($data === null) return;
+            if ($data === null) {
+                return;
+            }
 
-            // Ambil data dari formulir
-            $targetName = $data[1];
-            $waitTime = (int)$data[2];
+            $targetName = $data[0];
+            $waitTime = intval($data[1]);
 
-            // Proses tantangan duel
-            $target = $this->duelManager->getPlugin()->getServer()->getPlayer($targetName);
-            if ($target === null) {
-                $player->sendMessage(TextFormat::RED . "Pemain tidak ditemukan.");
+            if (empty($targetName)) {
+                $player->sendMessage(TextFormat::RED . "Nama pemain tidak boleh kosong.");
                 return;
             }
 
@@ -36,10 +35,15 @@ class DuelForm extends CustomForm {
             $player->sendMessage(TextFormat::GREEN . "Tantangan duel terkirim ke " . $targetName . ". Waktu tunggu: " . $waitTime . " detik.");
 
             // Mulai duel setelah waktu tunggu
-            $this->duelManager->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(new \pocketmine\scheduler\ClosureTask(function () use ($player, $target) {
+            $this->duelManager->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(new \pocketmine\scheduler\ClosureTask(function () use ($player, $targetName) {
                 if (isset($this->duelManager->waitingDuels[$player->getName()])) {
                     unset($this->duelManager->waitingDuels[$player->getName()]);
-                    $this->duelManager->startDuel($player, $target);
+                    $target = $this->duelManager->getPlugin()->getServer()->getPlayer($targetName);
+                    if ($target instanceof Player) {
+                        $this->duelManager->startDuel($player, $target, 60); // Default duration
+                    } else {
+                        $player->sendMessage(TextFormat::RED . "Pemain " . $targetName . " tidak ditemukan.");
+                    }
                 }
             }), $waitTime * 20); // 20 ticks per second
         });
@@ -50,7 +54,7 @@ class DuelForm extends CustomForm {
     public function jsonSerialize() {
         return [
             "type" => "custom_form",
-            "title" => "Duel Challenge",
+            "title" => "Tantangan Duel",
             "content" => [
                 [
                     "type" => "label",
