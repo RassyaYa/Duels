@@ -6,7 +6,7 @@ author: "VsrStudio"
 commands:
   duel:
     description: "Tantang pemain lain untuk berduel"
-    usage: "/duel <nama_pemain>"
+    usage: "/duel <nama_pemain> <waktu_dalam_detik>"
     permission: "duels.command.duel"
   accept:
     description: "Terima tantangan duel"
