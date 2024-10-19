@@ -3,86 +3,55 @@
 namespace Duels;
 
 use pocketmine\Player;
-use pocketmine\item\Item;
-use pocketmine\level\Position;
+use pocketmine\utils\TextFormat;
 
 class Duel {
     private Player $player1;
     private Player $player2;
-    private int $waitTime;
     private int $duration;
-    private bool $isActive = false;
 
-    public function __construct(Player $player1, Player $player2, int $waitTime, int $duration) {
+    public function __construct(Player $player1, Player $player2, int $duration) {
         $this->player1 = $player1;
         $this->player2 = $player2;
-        $this->waitTime = $waitTime;
         $this->duration = $duration;
     }
 
     public function start(): void {
-        $this->isActive = true;
-
         // Reset inventory
-        $this->resetInventory($this->player1);
-        $this->resetInventory($this->player2);
+        $this->preparePlayer($this->player1);
+        $this->preparePlayer($this->player2);
+        
+        // Inform players
+        $this->player1->sendMessage(TextFormat::GREEN . "Duel dimulai melawan " . $this->player2->getName());
+        $this->player2->sendMessage(TextFormat::GREEN . "Duel dimulai melawan " . $this->player1->getName());
 
-        // Give armor and weapons
-        $this->giveArmor($this->player1);
-        $this->giveArmor($this->player2);
-        $this->giveWeapons($this->player1);
-        $this->giveWeapons($this->player2);
-
-        // Teleport players to the duel location
-        $duelLocation = new Position(100, 64, 100, $this->player1->getLevel());
-        $this->player1->teleport($duelLocation);
-        $this->player2->teleport($duelLocation);
-
-        // Notify players
-        $this->player1->sendMessage(TextFormat::GREEN . "Duel dimulai dengan " . $this->player2->getName() . "!");
-        $this->player2->sendMessage(TextFormat::GREEN . "Duel dimulai dengan " . $this->player1->getName() . "!");
-
-        // Schedule end of duel
-        $this->scheduleDuelEnd();
+        // Schedule ending the duel
+        $this->player1->getServer()->getScheduler()->scheduleDelayedTask(new ClosureTask(function() {
+            $this->endDuel();
+        }), $this->duration * 20); // 20 ticks per second
     }
 
-    private function resetInventory(Player $player): void {
+    private function preparePlayer(Player $player): void {
+        // Reset inventory
         $player->getInventory()->clearAll();
+        
+        // Give items (armor and weapons)
+        $player->getInventory()->addItem(\pocketmine\item\ItemFactory::getInstance()->get(276, 0, 1)); // Diamond Sword
+        // Give diamond armor
+        $player->getInventory()->setArmorContents([
+            \pocketmine\item\ItemFactory::getInstance()->get(311, 0, 1), // Diamond Helmet
+            \pocketmine\item\ItemFactory::getInstance()->get(307, 0, 1), // Diamond Chestplate
+            \pocketmine\item\ItemFactory::getInstance()->get(308, 0, 1), // Diamond Leggings
+            \pocketmine\item\ItemFactory::getInstance()->get(309, 0, 1)  // Diamond Boots
+        ]);
     }
 
-    private function giveArmor(Player $player): void {
-        // Give armor to the player
-        $player->getArmorInventory()->setHelmet(Item::get(Item::DIAMOND_HELMET));
-        $player->getArmorInventory()->setChestplate(Item::get(Item::DIAMOND_CHESTPLATE));
-        $player->getArmorInventory()->setLeggings(Item::get(Item::DIAMOND_LEGGINGS));
-        $player->getArmorInventory()->setBoots(Item::get(Item::DIAMOND_BOOTS));
-    }
-
-    private function giveWeapons(Player $player): void {
-        // Give weapons to the player
-        $player->getInventory()->addItem(Item::get(Item::DIAMOND_SWORD));
-        $player->getInventory()->addItem(Item::get(Item::HEALING_POTION, 0, 5)); // Give 5 healing potions
-    }
-
-    private function scheduleDuelEnd(): void {
-        $this->player1->getServer()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () {
-            $this->end();
-        }), $this->duration * 20); // 20 ticks = 1 detik
-    }
-
-    public function end(): void {
-        if (!$this->isActive) return;
-
-        $this->isActive = false;
-        $this->player1->sendMessage(TextFormat::RED . "Duel Anda telah berakhir!");
-        $this->player2->sendMessage(TextFormat::RED . "Duel Anda telah berakhir!");
-
-        // Teleport back to spawn
-        $this->player1->teleport($this->player1->getServer()->getDefaultLevel()->getSafeSpawn());
-        $this->player2->teleport($this->player2->getServer()->getDefaultLevel()->getSafeSpawn());
-    }
-
-    public function isActive(): bool {
-        return $this->isActive;
+    private function endDuel(): void {
+        // Logic to handle duel ending
+        // Notify players that the duel has ended
+        $this->player1->sendMessage(TextFormat::YELLOW . "Duel berakhir!");
+        $this->player2->sendMessage(TextFormat::YELLOW . "Duel berakhir!");
+        
+        // Clear inventory or return players to original state if necessary
     }
 }
