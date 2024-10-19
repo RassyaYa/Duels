@@ -26,22 +26,16 @@ class DuelForm extends CustomForm {
                 return;
             }
 
-            if ($target === $player) {
-                $player->sendMessage(TextFormat::RED . "Anda tidak bisa menantang diri sendiri.");
+            if ($waitTime <= 0) {
+                $player->sendMessage(TextFormat::RED . "Waktu tunggu tidak valid.");
                 return;
             }
 
-            if (isset($this->duelManager->waitingDuels[$player->getName()])) {
-                $player->sendMessage(TextFormat::RED . "Anda sedang menunggu untuk duel.");
-                return;
-            }
+            // Simpan tantangan duel
+            $this->duelManager->waitingDuels[$player->getName()] = $targetName;
+            $player->sendMessage(TextFormat::GREEN . "Tantangan duel terkirim ke " . $targetName . ". Waktu tunggu: " . $waitTime . " detik.");
 
-            // Simpan tantangan
-            $this->duelManager->waitingDuels[$player->getName()] = $target->getName();
-            $player->sendMessage(TextFormat::GREEN . "Anda telah menantang " . $target->getName() . " untuk berduel dalam waktu " . $waitTime . " detik.");
-            $target->sendMessage(TextFormat::YELLOW . $player->getName() . " telah menantang Anda untuk berduel! Ketik /accept untuk menerima.");
-
-            // Jadwalkan mulai duel setelah waktu tunggu
+            // Mulai duel setelah waktu tunggu
             $this->duelManager->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(new \pocketmine\scheduler\ClosureTask(function () use ($player, $target) {
                 if (isset($this->duelManager->waitingDuels[$player->getName()])) {
                     unset($this->duelManager->waitingDuels[$player->getName()]);
