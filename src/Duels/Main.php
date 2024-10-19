@@ -1,50 +1,32 @@
-<?php
-
 namespace Duels;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\event\Listener;
-use pocketmine\utils\TextFormat;
 
-class Main extends PluginBase implements Listener {
-
+class Main extends PluginBase {
     private DuelManager $duelManager;
 
-    public function onEnable(): void {
+    protected function onEnable(): void {
         $this->duelManager = new DuelManager($this);
-        $this->getServer()->getPluginManager()->registerEvents($this->duelManager, $this);
-        $this->getLogger()->info(TextFormat::GREEN . "Duels plugin enabled!");
+    }
+
+    public function getDuelManager(): DuelManager {
+        return $this->duelManager;
     }
 
     public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool {
         switch ($command->getName()) {
             case "duel":
-                if ($sender instanceof Player) {
-                    $this->duelManager->showDuelForm($sender);
-                } else {
-                    $sender->sendMessage(TextFormat::RED . "Perintah ini hanya dapat digunakan oleh pemain dalam permainan.");
-                }
-                return true;
-
+                // Logika untuk perintah duel
+                return $this->duelManager->handleDuelCommand($sender, $args);
             case "accept":
-                if ($sender instanceof Player) {
-                    return $this->duelManager->handleAcceptCommand($sender);
-                }
-                return false;
-
+                return $this->duelManager->handleAcceptCommand($sender);
             case "decline":
-                if ($sender instanceof Player) {
-                    return $this->duelManager->handleDeclineCommand($sender);
-                }
+                return $this->duelManager->handleDeclineCommand($sender);
+            default:
                 return false;
         }
-        return false;
-    }
-
-    public function getDuelManager(): DuelManager {
-        return $this->duelManager;
     }
 }
