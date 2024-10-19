@@ -13,12 +13,12 @@ class DuelManager {
 
     public function handleDuelCommand(CommandSender $sender, array $args): bool {
         if (!$sender instanceof Player) {
-            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
+            $this->plugin->getLogger()->info("Perintah ini hanya dapat dijalankan oleh pemain!");
             return true;
         }
 
         if (count($args) < 2) {
-            $sender->sendMessage("Gunakan: /duel <nama_pemain> <waktu_dalam_detik>");
+            $this->plugin->getLogger()->info("Gunakan: /duel <nama_pemain> <waktu_dalam_detik>");
             return true;
         }
 
@@ -27,7 +27,7 @@ class DuelManager {
         $target = $this->plugin->getServer()->getPlayerExact($targetName);
 
         if ($target === null || $target === $sender) {
-            $sender->sendMessage("Pemain tidak ditemukan atau Anda tidak dapat menantang diri sendiri!");
+            $this->plugin->getLogger()->info("Pemain tidak ditemukan atau Anda tidak dapat menantang diri sendiri!");
             return true;
         }
 
@@ -41,14 +41,14 @@ class DuelManager {
 
     public function handleAcceptCommand(CommandSender $sender): bool {
         if (!$sender instanceof Player) {
-            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
+            $this->plugin->getLogger()->info("Perintah ini hanya dapat dijalankan oleh pemain!");
             return true;
         }
 
         $challengerName = array_search($sender->getName(), $this->challenges);
 
         if ($challengerName === false) {
-            $sender->sendMessage("Anda tidak memiliki tantangan duel yang aktif!");
+            $this->plugin->getLogger()->info("Anda tidak memiliki tantangan duel yang aktif!");
             return true;
         }
 
@@ -66,14 +66,14 @@ class DuelManager {
 
     public function handleDeclineCommand(CommandSender $sender): bool {
         if (!$sender instanceof Player) {
-            $sender->sendMessage("Perintah ini hanya dapat dijalankan oleh pemain!");
+            $this->plugin->getLogger()->info("Perintah ini hanya dapat dijalankan oleh pemain!");
             return true;
         }
 
         $challengerName = array_search($sender->getName(), $this->challenges);
 
         if ($challengerName === false) {
-            $sender->sendMessage("Anda tidak memiliki tantangan duel yang aktif!");
+            $this->plugin->getLogger()->info("Anda tidak memiliki tantangan duel yang aktif!");
             return true;
         }
 
