@@ -26,7 +26,7 @@ class Duel {
         $this->player2->sendMessage(TextFormat::GREEN . "Duel dimulai melawan " . $this->player1->getName());
 
         // Schedule ending the duel
-        $this->player1->getServer()->getScheduler()->scheduleDelayedTask(new ClosureTask(function() {
+        $this->player1->getServer()->getScheduler()->scheduleDelayedTask(new \pocketmine\scheduler\ClosureTask(function() {
             $this->endDuel();
         }), $this->duration * 20); // 20 ticks per second
     }
