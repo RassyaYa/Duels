@@ -2,7 +2,7 @@ name: Duels
 version: 1.0.0
 main: Duels\Main
 api: [5.0.0]
-author: "Nama Anda"  # Ganti dengan nama Anda
+author: "VsrStudio"
 commands:
   duel:
     description: "Tantang pemain lain untuk berduel"
